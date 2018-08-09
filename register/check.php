@@ -9,7 +9,7 @@
 
     $name = $_SESSION['register']['name'];
     $email = $_SESSION['register']['email'];
-    $passwprd = $_SESSION['register']['password'];
+    $password = $_SESSION['register']['password'];
     $img_name = $_SESSION['register']['img_name'];
 
     //登録ボタンが押された時に処理する＝＄_POSTにhiddenの値が入っている時
