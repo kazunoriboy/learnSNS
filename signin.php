@@ -1,4 +1,5 @@
 <?php
+  session_start();
   require('dbconnect.php');
   $errors = array();
 
@@ -21,10 +22,11 @@
         $errors['signin'] = 'failed';
       } else { //=入力されていたメールアドレスが存在していた
         if(password_verify($password,$record['password'])){
+          $_SESSION['id'] = $record['id'];
 
-
-
-
+          header('Location: timeline.php');
+          exit();
+          
         } else {
           $errors['signin'] = 'ff';
         }
