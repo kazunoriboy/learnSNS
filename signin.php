@@ -34,7 +34,7 @@
     }
   }
 
-  var_dump($errors);
+  // var_dump($errors);
 ?>
 <!DOCTYPE html>
 <html lang="ja">

@@ -9,7 +9,6 @@
 
   $login_user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-var_dump($login_user);
 
 ?>
 <!DOCTYPE html>
