@@ -9,6 +9,36 @@
 
   $login_user = $stmt->fetch(PDO::FETCH_ASSOC);
 
+  $errors = array();
+
+  if(!empty($_POST)) {
+    $feed = $_POST['feed'];
+
+    if($feed == ''){
+      $errors['feed'] = 'blank';
+    } else {
+      $sql = 'INSERT INTO `feeds` SET `feed`=?, `user_id`=?, `created`=NOW()';
+      $data = array($feed, $_SESSION['id']);
+      $stmt = $dbh->prepare($sql);
+      $stmt->execute($data);
+
+      header('Location: timeline.php');
+      exit();
+    }
+  }//POST送信されたら終わり
+
+  //一覧データの取得
+  $feeds = array();
+  $sql = 'SELECT `feeds`.*,`users`.`name`,`users`.`img_name` FROM `feeds` JOIN `users` ON `feeds`.`user_id`=`users`.`id` ORDER BY `created` DESC';
+  $stmt = $dbh->prepare($sql);
+  $stmt->execute();
+  while(1) {
+    $rec = $stmt->fetch(PDO::FETCH_ASSOC);
+    if($rec == false){
+      break;
+    }
+    $feeds[] = $rec;
+  }
 
 ?>
 <!DOCTYPE html>
@@ -39,20 +69,24 @@
             </div>
             <input type="submit" value="投稿する" class="btn btn-primary">
           </form>
+          <?php if(isset($errors['feed']) && $errors['feed'] == 'blank') { ?>
+            <p class="alert alert-danger">投稿データを入力してください</p>
+          <?php } ?>
         </div>
+        <?php foreach($feeds as $key => $feed) { ?>
           <div class="thumbnail">
             <div class="row">
               <div class="col-xs-1">
-                <img src="https://placehold.jp/40x40.png" width="40">
+                <img src="<?php echo 'user_profile_img/'.$feed['img_name']; ?>" width="40">
               </div>
               <div class="col-xs-11">
-                野原ひろし<br>
-                <a href="#" style="color: #7F7F7F;">2018-03-03</a>
+                <?php echo $feed['name']; ?><br>
+                <a href="#" style="color: #7F7F7F;"><?php echo $feed['created']; ?></a>
               </div>
             </div>
             <div class="row feed_content">
               <div class="col-xs-12" >
-                <span style="font-size: 24px;">夢は逃げない。逃げるのはいつも自分だ。</span>
+                <span style="font-size: 24px;"><?php echo $feed['feed']; ?></span>
               </div>
             </div>
             <div class="row feed_sub">
@@ -69,6 +103,7 @@
               </div>
             </div>
           </div>
+        <?php } ?>
         <div aria-label="Page navigation">
           <ul class="pager">
             <li class="previous disabled"><a href="#"><span aria-hidden="true">&larr;</span> Newer</a></li>
