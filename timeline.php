@@ -11,6 +11,26 @@
 
   $errors = array();
 
+  if(isset($_GET['page'])){
+    $page = $_GET['page'];
+  } else {
+    $page = 1;
+  }
+
+  const CONTENT_PER_PAGE = 5;
+
+  $page = max($page, 1);
+
+  $sql_count = "SELECT COUNT(*) AS `cnt` FROM `feeds`";
+  $stmt_count = $dbh->prepare($sql_count);
+  $stmt_count->execute();
+  $record_cnt = $stmt_count->fetch(PDO::FETCH_ASSOC);
+
+  $last_page = ceil($record_cnt['cnt'] / CONTENT_PER_PAGE);
+
+  $page = min($page, $last_page);
+  $start = ($page -1) * CONTENT_PER_PAGE;
+
   if(!empty($_POST)) {
     $feed = $_POST['feed'];
 
@@ -29,7 +49,7 @@
 
   //一覧データの取得
   $feeds = array();
-  $sql = 'SELECT `feeds`.*,`users`.`name`,`users`.`img_name` FROM `feeds` JOIN `users` ON `feeds`.`user_id`=`users`.`id` ORDER BY `created` DESC';
+  $sql = 'SELECT `feeds`.*,`users`.`name`,`users`.`img_name` FROM `feeds` JOIN `users` ON `feeds`.`user_id`=`users`.`id` ORDER BY `created` DESC LIMIT '. CONTENT_PER_PAGE . ' OFFSET '. $start;
   $stmt = $dbh->prepare($sql);
   $stmt->execute();
   while(1) {
@@ -106,8 +126,17 @@
         <?php } ?>
         <div aria-label="Page navigation">
           <ul class="pager">
-            <li class="previous disabled"><a href="#"><span aria-hidden="true">&larr;</span> Newer</a></li>
-            <li class="next"><a href="#">Older <span aria-hidden="true">&rarr;</span></a></li>
+            <?php if ($page == 1): ?>
+                <li class="previous disabled"><a><span aria-hidden="true">&larr;</span> Newer</a></li>
+            <?php else: ?>
+                <li class="previous"><a href="timeline.php?page=<?= $page - 1; ?>"><span aria-hidden="true">&larr;</span> Newer</a></li>
+            <?php endif; ?>
+
+            <?php if ($page == $last_page): ?>
+                <li class="next disabled"><a>Older <span aria-hidden="true">&rarr;</span></a></li>
+            <?php else: ?>
+                <li class="next"><a href="timeline.php?page=<?= $page + 1; ?>">Older <span aria-hidden="true">&rarr;</span></a></li>
+            <?php endif; ?>
           </ul>
         </div>
       </div>
